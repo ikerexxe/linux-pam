@@ -79,7 +79,7 @@ static int _pam_parse_conf_file(pam_handle_t *pamh, FILE *f
 	char **argv;
 	int argvlen;
 
-	D(("LINE: %s", buf));
+	//D(("LINE: %s", buf));
 	if (known_service != NULL) {
 	    nexttok = buf;
 	    /* No service field: all lines are for the known service. */
@@ -583,7 +583,7 @@ int _pam_init_handlers(pam_handle_t *pamh)
 
 static int _pam_assemble_line(FILE *f, char **buffer)
 {
-    char *p = NULL;
+    char *p = NULL, *start = NULL;
     size_t buf_len;
     char *s, *os;
     int used = 0;
@@ -602,6 +602,7 @@ static int _pam_assemble_line(FILE *f, char **buffer)
 		return 0;
 	    }
 	}
+	start = p;
 
 	/* skip leading spaces --- line may be blank */
 
@@ -653,7 +654,13 @@ static int _pam_assemble_line(FILE *f, char **buffer)
 	}
     }
 
-    *buffer = p;
+    *buffer = malloc(strlen(p) + 1);
+    if (*buffer == NULL) {
+        free(start);
+        return -1;
+    }
+    strcpy(*buffer, p);
+    free(start);
 
     return used;
 }
